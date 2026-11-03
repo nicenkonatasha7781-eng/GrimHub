@@ -1,669 +1,622 @@
-local lI1lI = string.char
-local O00O0 = bit32.bxor
-local Il1Il = table.concat
-local l1IlI = table.insert
-local O0000 = table.clear
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local function I1l1I(O0O0)
-    local l11l = {}
-    for Il11 = 1, #O0O0 do
-        l11l[Il11] = lI1lI(O00O0(O0O0[Il11], 0x5A))
-    end
-    return Il1Il(l11l)
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local TOGGLE_KEY = Enum.KeyCode.RightShift
+local UNLOAD_KEY = Enum.KeyCode.KeypadThree
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ModernPanelGui_Light"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
+
+local connections = {}
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 340, 0, 300)
+mainFrame.Position = UDim2.new(0.5, -170, 0.5, -150)
+mainFrame.BackgroundColor3 = Color3.fromRGB(245, 247, 250)
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Active = true
+mainFrame.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 10)
+mainCorner.Parent = mainFrame
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(220, 225, 235)
+mainStroke.Thickness = 1.2
+mainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+mainStroke.Parent = mainFrame
+
+local bgGradient = Instance.new("UIGradient")
+bgGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(240, 242, 248))
+})
+bgGradient.Rotation = 45
+bgGradient.Parent = mainFrame
+
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Size = UDim2.new(1, 0, 0, 42)
+header.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+header.BackgroundTransparency = 0.3
+header.BorderSizePixel = 0
+header.Active = true
+header.Parent = mainFrame
+
+local headerDivider = Instance.new("Frame")
+headerDivider.Name = "Divider"
+headerDivider.Size = UDim2.new(1, 0, 0, 1)
+headerDivider.Position = UDim2.new(0, 0, 1, -1)
+headerDivider.BackgroundColor3 = Color3.fromRGB(225, 230, 240)
+headerDivider.BorderSizePixel = 0
+headerDivider.Parent = header
+
+local accentPill = Instance.new("Frame")
+accentPill.Size = UDim2.new(0, 3, 0, 16)
+accentPill.Position = UDim2.new(0, 14, 0.5, -8)
+accentPill.BackgroundColor3 = Color3.fromRGB(0, 210, 235)
+accentPill.BorderSizePixel = 0
+accentPill.Parent = header
+
+local pillCorner = Instance.new("UICorner")
+pillCorner.CornerRadius = UDim.new(1, 0)
+pillCorner.Parent = accentPill
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(0.5, 0, 1, 0)
+titleLabel.Position = UDim2.new(0, 26, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Text = "Terminal"
+titleLabel.TextColor3 = Color3.fromRGB(30, 32, 40)
+titleLabel.TextSize = 14
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Active = false
+titleLabel.Parent = header
+
+local isTouchDevice = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+local keybindBadge = Instance.new("TextLabel")
+keybindBadge.Size = UDim2.new(0, 58, 0, 22)
+keybindBadge.Position = UDim2.new(1, -90, 0.5, -11)
+keybindBadge.BackgroundColor3 = Color3.fromRGB(235, 240, 248)
+keybindBadge.Font = Enum.Font.GothamMedium
+keybindBadge.Text = isTouchDevice and "MOBILE" or "R-SHIFT"
+keybindBadge.TextColor3 = Color3.fromRGB(100, 110, 130)
+keybindBadge.TextSize = 10
+keybindBadge.Active = false
+keybindBadge.Parent = header
+
+local badgeCorner = Instance.new("UICorner")
+badgeCorner.CornerRadius = UDim.new(0, 5)
+badgeCorner.Parent = keybindBadge
+
+local badgeStroke = Instance.new("UIStroke")
+badgeStroke.Color = Color3.fromRGB(215, 225, 240)
+badgeStroke.Thickness = 1
+badgeStroke.Parent = keybindBadge
+
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Name = "MinimizeBtn"
+minimizeBtn.Size = UDim2.new(0, 24, 0, 22)
+minimizeBtn.Position = UDim2.new(1, -28, 0.5, -11)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(235, 240, 248)
+minimizeBtn.AutoButtonColor = false
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.Text = "-"
+minimizeBtn.TextColor3 = Color3.fromRGB(100, 110, 130)
+minimizeBtn.TextSize = 14
+minimizeBtn.Parent = header
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 5)
+minCorner.Parent = minimizeBtn
+
+local minStroke = Instance.new("UIStroke")
+minStroke.Color = Color3.fromRGB(215, 225, 240)
+minStroke.Thickness = 1
+minStroke.Parent = minimizeBtn
+
+local contentArea = Instance.new("Frame")
+contentArea.Name = "ContentArea"
+contentArea.Size = UDim2.new(1, -28, 1, -56)
+contentArea.Position = UDim2.new(0, 14, 0, 50)
+contentArea.BackgroundTransparency = 1
+contentArea.Parent = mainFrame
+
+local sectionLabel = Instance.new("TextLabel")
+sectionLabel.Size = UDim2.new(1, 0, 0, 18)
+sectionLabel.Position = UDim2.new(0, 2, 0, 0)
+sectionLabel.BackgroundTransparency = 1
+sectionLabel.Font = Enum.Font.GothamSemibold
+sectionLabel.Text = "TRANSFORMATIONS"
+sectionLabel.TextColor3 = Color3.fromRGB(130, 140, 160)
+sectionLabel.TextSize = 11
+sectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+sectionLabel.Parent = contentArea
+
+-- Вспомогательная функция для создания двух неоновых cyan глаз
+local function createCyanEyes(parentObj: Instance, posX: number, posY: number)
+    local eyesContainer = Instance.new("Frame")
+    eyesContainer.Name = "CyanEyes"
+    eyesContainer.Size = UDim2.new(0, 22, 0, 12)
+    eyesContainer.Position = UDim2.new(0, posX, 0.5, posY)
+    eyesContainer.BackgroundTransparency = 1
+    eyesContainer.Parent = parentObj
+
+    local leftEye = Instance.new("Frame")
+    leftEye.Name = "LeftEye"
+    leftEye.Size = UDim2.new(0, 7, 0, 10)
+    leftEye.Position = UDim2.new(0, 1, 0.5, -5)
+    leftEye.BackgroundColor3 = Color3.fromRGB(0, 225, 255)
+    leftEye.BorderSizePixel = 0
+    leftEye.Parent = eyesContainer
+
+    local leftCorner = Instance.new("UICorner")
+    leftCorner.CornerRadius = UDim.new(1, 0)
+    leftCorner.Parent = leftEye
+
+    local leftPupil = Instance.new("Frame")
+    leftPupil.Size = UDim2.new(0, 2, 0, 5)
+    leftPupil.Position = UDim2.new(0.5, -1, 0.5, -2)
+    leftPupil.BackgroundColor3 = Color3.fromRGB(240, 255, 255)
+    leftPupil.BorderSizePixel = 0
+    leftPupil.Parent = leftEye
+
+    local leftPupilCorner = Instance.new("UICorner")
+    leftPupilCorner.CornerRadius = UDim.new(1, 0)
+    leftPupilCorner.Parent = leftPupil
+
+    local rightEye = Instance.new("Frame")
+    rightEye.Name = "RightEye"
+    rightEye.Size = UDim2.new(0, 7, 0, 10)
+    rightEye.Position = UDim2.new(0, 14, 0.5, -5)
+    rightEye.BackgroundColor3 = Color3.fromRGB(0, 225, 255)
+    rightEye.BorderSizePixel = 0
+    rightEye.Parent = eyesContainer
+
+    local rightCorner = Instance.new("UICorner")
+    rightCorner.CornerRadius = UDim.new(1, 0)
+    rightCorner.Parent = rightEye
+
+    local rightPupil = Instance.new("Frame")
+    rightPupil.Size = UDim2.new(0, 2, 0, 5)
+    rightPupil.Position = UDim2.new(0.5, -1, 0.5, -2)
+    rightPupil.BackgroundColor3 = Color3.fromRGB(240, 255, 255)
+    rightPupil.BorderSizePixel = 0
+    rightPupil.Parent = rightEye
+
+    local rightPupilCorner = Instance.new("UICorner")
+    rightPupilCorner.CornerRadius = UDim.new(1, 0)
+    rightPupilCorner.Parent = rightPupil
+
+    return eyesContainer, leftEye, rightEye
 end
 
-local O00O = {
-    [1] = I1l1I({29,63,46,9,63,40,44,51,57,63}),
-    [2] = I1l1I({10,54,59,35,63,40,41}),
-    [3] = I1l1I({15,41,63,40,19,52,42,47,46,9,63,40,44,51,57,63}),
-    [4] = I1l1I({14,45,63,63,52,9,63,40,44,51,57,63}),
-    [5] = I1l1I({8,63,42,54,51,57,59,46,63,62,9,46,53,40,59,61,63}),
-    [6] = I1l1I({22,53,57,59,54,10,54,59,35,63,40}),
-    [7] = I1l1I({13,59,51,46,28,53,40,25,50,51,54,62}),
-    [8] = I1l1I({10,54,59,35,63,40,29,47,51}),
-    [9] = I1l1I({9,57,40,63,63,52,29,47,51}),
-    [10] = I1l1I({23,53,62,63,40,52,10,59,52,63,54,29,47,51,5,22,51,61,50,46}),
-    [11] = I1l1I({28,40,59,55,63}),
-    [12] = I1l1I({23,59,51,52,28,40,59,55,63}),
-    [13] = I1l1I({15,19,25,53,40,52,63,40}),
-    [14] = I1l1I({15,19,9,46,40,53,49,63}),
-    [15] = I1l1I({15,19,29,40,59,62,51,63,52,46}),
-    [16] = I1l1I({18,63,59,62,63,40}),
-    [17] = I1l1I({30,51,44,51,62,63,40}),
-    [18] = I1l1I({14,63,34,46,22,59,56,63,54}),
-    [19] = I1l1I({14,63,40,55,51,52,59,54}),
-    [20] = I1l1I({8,119,9,18,19,28,14}),
-    [21] = I1l1I({25,53,52,46,63,52,46,27,40,63,59}),
-    [22] = I1l1I({14,8,27,20,9,28,21,8,23,27,14,19,21,20,9}),
-    [23] = I1l1I({14,63,34,46,24,47,46,46,53,52}),
-    [24] = I1l1I({25,54,59,41,41,51,57,28,53,34,25,59,40,62}),
-    [25] = I1l1I({19,55,59,61,63,22,59,56,63,54}),
-    [26] = I1l1I({40,56,34,59,41,41,63,46,51,62,96,117,117,109,110,99,106,106,107,105,106,98,104}),
-    [27] = I1l1I({25,54,59,41,41,51,57,122,28,53,34,122,28,53,40,55}),
-    [28] = I1l1I({9,57,59,40,59,56,63,54,54,59,25,59,40,62}),
-    [29] = I1l1I({9,57,59,40,59,56,63,54,54,59}),
-    [30] = I1l1I({25,54,59,41,41,51,57,30,53,61,25,59,40,62}),
-    [31] = I1l1I({25,54,59,41,41,51,57,122,30,53,61}),
-    [32] = I1l1I({28,54,53,59,46,51,52,61,19,57,53,52}),
-    [33] = I1l1I({25,53,40,63}),
-    [34] = I1l1I({8,63,55,53,46,63,41}),
-    [35] = I1l1I({9,35,41,46,63,55}),
-    [36] = I1l1I({29,51,44,63,16,63,45,63,54}),
-    [37] = I1l1I({28,53,34}),
-    [38] = I1l1I({20,53,52,63}),
-    [39] = I1l1I({25,50,59,40,59,57,46,63,40}),
-    [40] = I1l1I({27,56,51,46,51,46,51,63,41}),
-    [41] = I1l1I({14,40,59,52,41,60,53,40,55}),
-    [42] = I1l1I({25,54,59,41,41,51,57}),
-    [43] = I1l1I({22,59,62,35,56,47,61}),
-    [44] = I1l1I({30,53,61}),
-    [45] = I1l1I({8,63,51,55,59,61,51,52,63,62}),
-    [46] = I1l1I({19,52,44,53,49,63,9,63,40,44,63,40}),
-    [47] = I1l1I({28,51,40,63,9,63,40,44,63,40}),
-    [48] = I1l1I({25,40,63,59,46,63}),
-    [49] = I1l1I({10,54,59,35}),
-    [50] = I1l1I({25,53,55,42,54,63,46,63,62}),
-    [51] = I1l1I({13,59,51,46}),
-    [52] = I1l1I({30,51,41,57,53,52,52,63,57,46}),
-    [53] = I1l1I({30,63,41,46,40,53,35}),
-    [54] = I1l1I({29,63,46,23,53,47,41,63,22,53,57,59,46,51,53,52})
-}
+local foxCard = Instance.new("TextButton")
+foxCard.Name = "ClassicFoxCard"
+foxCard.Size = UDim2.new(1, 0, 0, 46)
+foxCard.Position = UDim2.new(0, 0, 0, 24)
+foxCard.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+foxCard.AutoButtonColor = false
+foxCard.Text = ""
+foxCard.Parent = contentArea
 
-local l1l1, O000, IlIl, lIIl, O0OO, I11I, l1I1, OO00
-local Il1I, lI1I, O0O1, I1Il, l1lI, O00I, IlII, lIII
-local O0OI, I11l, l1II, OO0I, Il1l, lI1l, O0Ol, I1I1
-local l1ll, O00l, IlI1, lII1, O0O2, I111, l1I2, OO01
-local Il12, lI12, O0O3, I1I2, l1l2, O002, IlI2, lII2
-local O0O4, I112, l1I3, OO02, Il13, lI13, O0O5, I1I3
-local l1l3, O003, IlI3, lII3, O0O6, I113, l1I4, OO03
+local cardCorner = Instance.new("UICorner")
+cardCorner.CornerRadius = UDim.new(0, 8)
+cardCorner.Parent = foxCard
 
-local _S = 0x101
-while _S ~= 0x0 do
-    if _S == 0x101 then
-        l1l1 = game:GetService(O00O[2])
-        O000 = game:GetService(O00O[3])
-        IlIl = game:GetService(O00O[4])
-        lIIl = game:GetService(O00O[5])
-        _S = 0x204
-    elseif _S == 0x204 then
-        O0OO = l1l1.LocalPlayer
-        I11I = O0OO:WaitForChild(O00O[8])
-        l1I1 = Enum.KeyCode.RightShift
-        OO00 = Enum.KeyCode.KeypadThree
-        Il1I = {}
-        _S = 0x308
-    elseif _S == 0x308 then
-        lI1I = Instance.new(O00O[9])
-        lI1I.Name = O00O[10]
-        lI1I.ResetOnSpawn = false
-        lI1I.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        lI1I.Parent = I11I
+local cardStroke = Instance.new("UIStroke")
+cardStroke.Color = Color3.fromRGB(225, 230, 240)
+cardStroke.Thickness = 1
+cardStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+cardStroke.Parent = foxCard
 
-        O0O1 = Instance.new(O00O[11])
-        O0O1.Name = O00O[12]
-        O0O1.Size = UDim2.new(0, 340, 0, 300)
-        O0O1.Position = UDim2.new(0.5, -170, 0.5, -150)
-        O0O1.BackgroundColor3 = Color3.fromRGB(245, 247, 250)
-        O0O1.BorderSizePixel = 0
-        O0O1.ClipsDescendants = true
-        O0O1.Active = true
-        O0O1.Parent = lI1I
-        _S = 0x412
-    elseif _S == 0x412 then
-        I1Il = Instance.new(O00O[13])
-        I1Il.CornerRadius = UDim.new(0, 10)
-        I1Il.Parent = O0O1
+local eyesBox, eyeLeft, eyeRight = createCyanEyes(foxCard, 12, -6)
 
-        l1lI = Instance.new(O00O[14])
-        l1lI.Color = Color3.fromRGB(220, 225, 235)
-        l1lI.Thickness = 1.2
-        l1lI.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-        l1lI.Parent = O0O1
+local cardTitle = Instance.new("TextLabel")
+cardTitle.Size = UDim2.new(1, -120, 1, 0)
+cardTitle.Position = UDim2.new(0, 44, 0, 0)
+cardTitle.BackgroundTransparency = 1
+cardTitle.Font = Enum.Font.GothamSemibold
+cardTitle.Text = "Classic Fox Form"
+cardTitle.TextColor3 = Color3.fromRGB(30, 32, 40)
+cardTitle.TextSize = 13
+cardTitle.TextXAlignment = Enum.TextXAlignment.Left
+cardTitle.Parent = foxCard
 
-        O00I = Instance.new(O00O[15])
-        O00I.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(240, 242, 248))
-        })
-        O00I.Rotation = 45
-        O00I.Parent = O0O1
-        _S = 0x518
-    elseif _S == 0x518 then
-        IlII = Instance.new(O00O[11])
-        IlII.Name = O00O[16]
-        IlII.Size = UDim2.new(1, 0, 0, 42)
-        IlII.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        IlII.BackgroundTransparency = 0.3
-        IlII.BorderSizePixel = 0
-        IlII.Active = true
-        IlII.Parent = O0O1
+local switchTrack = Instance.new("Frame")
+switchTrack.Size = UDim2.new(0, 40, 0, 22)
+switchTrack.Position = UDim2.new(1, -54, 0.5, -11)
+switchTrack.BackgroundColor3 = Color3.fromRGB(215, 220, 230)
+switchTrack.BorderSizePixel = 0
+switchTrack.Parent = foxCard
 
-        lIII = Instance.new(O00O[11])
-        lIII.Name = O00O[17]
-        lIII.Size = UDim2.new(1, 0, 0, 1)
-        lIII.Position = UDim2.new(0, 0, 1, -1)
-        lIII.BackgroundColor3 = Color3.fromRGB(225, 230, 240)
-        lIII.BorderSizePixel = 0
-        lIII.Parent = IlII
+local trackCorner = Instance.new("UICorner")
+trackCorner.CornerRadius = UDim.new(1, 0)
+trackCorner.Parent = switchTrack
 
-        O0OI = Instance.new(O00O[11])
-        O0OI.Size = UDim2.new(0, 3, 0, 16)
-        O0OI.Position = UDim2.new(0, 14, 0.5, -8)
-        O0OI.BackgroundColor3 = Color3.fromRGB(99, 102, 241)
-        O0OI.BorderSizePixel = 0
-        O0OI.Parent = IlII
+local trackStroke = Instance.new("UIStroke")
+trackStroke.Color = Color3.fromRGB(195, 205, 220)
+trackStroke.Thickness = 1
+trackStroke.Parent = switchTrack
 
-        I11l = Instance.new(O00O[13])
-        I11l.CornerRadius = UDim.new(1, 0)
-        I11l.Parent = O0OI
-        _S = 0x622
-    elseif _S == 0x622 then
-        l1II = Instance.new(O00O[18])
-        l1II.Size = UDim2.new(0.6, 0, 1, 0)
-        l1II.Position = UDim2.new(0, 26, 0, 0)
-        l1II.BackgroundTransparency = 1
-        l1II.Font = Enum.Font.GothamBold
-        l1II.Text = O00O[19]
-        l1II.TextColor3 = Color3.fromRGB(30, 32, 40)
-        l1II.TextSize = 14
-        l1II.TextXAlignment = Enum.TextXAlignment.Left
-        l1II.Active = false
-        l1II.Parent = IlII
+local switchKnob = Instance.new("Frame")
+switchKnob.Size = UDim2.new(0, 16, 0, 16)
+switchKnob.Position = UDim2.new(0, 3, 0.5, -8)
+switchKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+switchKnob.BorderSizePixel = 0
+switchKnob.Parent = switchTrack
 
-        OO0I = Instance.new(O00O[18])
-        OO0I.Size = UDim2.new(0, 62, 0, 22)
-        OO0I.Position = UDim2.new(1, -76, 0.5, -11)
-        OO0I.BackgroundColor3 = Color3.fromRGB(235, 240, 248)
-        OO0I.Font = Enum.Font.GothamMedium
-        OO0I.Text = O00O[20]
-        OO0I.TextColor3 = Color3.fromRGB(100, 110, 130)
-        OO0I.TextSize = 10
-        OO0I.Active = false
-        OO0I.Parent = IlII
+local knobCorner = Instance.new("UICorner")
+knobCorner.CornerRadius = UDim.new(1, 0)
+knobCorner.Parent = switchKnob
 
-        Il1l = Instance.new(O00O[13])
-        Il1l.CornerRadius = UDim.new(0, 5)
-        Il1l.Parent = OO0I
+local scarabCard = Instance.new("TextButton")
+scarabCard.Name = "ScarabellaCard"
+scarabCard.Size = UDim2.new(1, 0, 0, 46)
+scarabCard.Position = UDim2.new(0, 0, 0, 76)
+scarabCard.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+scarabCard.AutoButtonColor = false
+scarabCard.Text = ""
+scarabCard.Parent = contentArea
 
-        lI1l = Instance.new(O00O[14])
-        lI1l.Color = Color3.fromRGB(215, 225, 240)
-        lI1l.Thickness = 1
-        lI1l.Parent = OO0I
-        _S = 0x730
-    elseif _S == 0x730 then
-        O0Ol = Instance.new(O00O[11])
-        O0Ol.Name = O00O[21]
-        O0Ol.Size = UDim2.new(1, -28, 1, -56)
-        O0Ol.Position = UDim2.new(0, 14, 0, 50)
-        O0Ol.BackgroundTransparency = 1
-        O0Ol.Parent = O0O1
+local scarabCorner = Instance.new("UICorner")
+scarabCorner.CornerRadius = UDim.new(0, 8)
+scarabCorner.Parent = scarabCard
 
-        I1I1 = Instance.new(O00O[18])
-        I1I1.Size = UDim2.new(1, 0, 0, 18)
-        I1I1.Position = UDim2.new(0, 2, 0, 0)
-        I1I1.BackgroundTransparency = 1
-        I1I1.Font = Enum.Font.GothamSemibold
-        I1I1.Text = O00O[22]
-        I1I1.TextColor3 = Color3.fromRGB(130, 140, 160)
-        I1I1.TextSize = 11
-        I1I1.TextXAlignment = Enum.TextXAlignment.Left
-        I1I1.Parent = O0Ol
-        _S = 0x840
-    elseif _S == 0x840 then
-        l1ll = Instance.new(O00O[23])
-        l1ll.Name = O00O[24]
-        l1ll.Size = UDim2.new(1, 0, 0, 46)
-        l1ll.Position = UDim2.new(0, 0, 0, 24)
-        l1ll.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        l1ll.AutoButtonColor = false
-        l1ll.Text = ""
-        l1ll.Parent = O0Ol
+local scarabStroke = Instance.new("UIStroke")
+scarabStroke.Color = Color3.fromRGB(225, 230, 240)
+scarabStroke.Thickness = 1
+scarabStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+scarabStroke.Parent = scarabCard
 
-        O00l = Instance.new(O00O[13])
-        O00l.CornerRadius = UDim.new(0, 8)
-        O00l.Parent = l1ll
+local scarabIcon = Instance.new("ImageLabel")
+scarabIcon.Size = UDim2.new(0, 22, 0, 22)
+scarabIcon.Position = UDim2.new(0, 12, 0.5, -11)
+scarabIcon.BackgroundTransparency = 1
+scarabIcon.Image = "rbxassetid://7490013082"
+scarabIcon.ImageColor3 = Color3.fromRGB(230, 120, 30)
+scarabIcon.Parent = scarabCard
 
-        IlI1 = Instance.new(O00O[14])
-        IlI1.Color = Color3.fromRGB(225, 230, 240)
-        IlI1.Thickness = 1
-        IlI1.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-        IlI1.Parent = l1ll
+local scarabTitle = Instance.new("TextLabel")
+scarabTitle.Size = UDim2.new(1, -120, 1, 0)
+scarabTitle.Position = UDim2.new(0, 44, 0, 0)
+scarabTitle.BackgroundTransparency = 1
+scarabTitle.Font = Enum.Font.GothamSemibold
+scarabTitle.Text = "Scarabella"
+scarabTitle.TextColor3 = Color3.fromRGB(30, 32, 40)
+scarabTitle.TextSize = 13
+scarabTitle.TextXAlignment = Enum.TextXAlignment.Left
+scarabTitle.Parent = scarabCard
 
-        lII1 = Instance.new(O00O[25])
-        lII1.Size = UDim2.new(0, 22, 0, 22)
-        lII1.Position = UDim2.new(0, 12, 0.5, -11)
-        lII1.BackgroundTransparency = 1
-        lII1.Image = O00O[26]
-        lII1.ImageColor3 = Color3.fromRGB(99, 102, 241)
-        lII1.Parent = l1ll
+local scarabTrack = Instance.new("Frame")
+scarabTrack.Size = UDim2.new(0, 40, 0, 22)
+scarabTrack.Position = UDim2.new(1, -54, 0.5, -11)
+scarabTrack.BackgroundColor3 = Color3.fromRGB(215, 220, 230)
+scarabTrack.BorderSizePixel = 0
+scarabTrack.Parent = scarabCard
 
-        O0O2 = Instance.new(O00O[18])
-        O0O2.Size = UDim2.new(1, -120, 1, 0)
-        O0O2.Position = UDim2.new(0, 44, 0, 0)
-        O0O2.BackgroundTransparency = 1
-        O0O2.Font = Enum.Font.GothamSemibold
-        O0O2.Text = O00O[27]
-        O0O2.TextColor3 = Color3.fromRGB(30, 32, 40)
-        O0O2.TextSize = 13
-        O0O2.TextXAlignment = Enum.TextXAlignment.Left
-        O0O2.Parent = l1ll
+local scarabTrackCorner = Instance.new("UICorner")
+scarabTrackCorner.CornerRadius = UDim.new(1, 0)
+scarabTrackCorner.Parent = scarabTrack
 
-        I111 = Instance.new(O00O[11])
-        I111.Size = UDim2.new(0, 40, 0, 22)
-        I111.Position = UDim2.new(1, -54, 0.5, -11)
-        I111.BackgroundColor3 = Color3.fromRGB(215, 220, 230)
-        I111.BorderSizePixel = 0
-        I111.Parent = l1ll
+local scarabTrackStroke = Instance.new("UIStroke")
+scarabTrackStroke.Color = Color3.fromRGB(195, 205, 220)
+scarabTrackStroke.Thickness = 1
+scarabTrackStroke.Parent = scarabTrack
 
-        l1I2 = Instance.new(O00O[13])
-        l1I2.CornerRadius = UDim.new(1, 0)
-        l1I2.Parent = I111
+local scarabKnob = Instance.new("Frame")
+scarabKnob.Size = UDim2.new(0, 16, 0, 16)
+scarabKnob.Position = UDim2.new(0, 3, 0.5, -8)
+scarabKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+scarabKnob.BorderSizePixel = 0
+scarabKnob.Parent = scarabTrack
 
-        OO01 = Instance.new(O00O[14])
-        OO01.Color = Color3.fromRGB(195, 205, 220)
-        OO01.Thickness = 1
-        OO01.Parent = I111
+local scarabKnobCorner = Instance.new("UICorner")
+scarabKnobCorner.CornerRadius = UDim.new(1, 0)
+scarabKnobCorner.Parent = scarabKnob
 
-        Il12 = Instance.new(O00O[11])
-        Il12.Size = UDim2.new(0, 16, 0, 16)
-        Il12.Position = UDim2.new(0, 3, 0.5, -8)
-        Il12.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Il12.BorderSizePixel = 0
-        Il12.Parent = I111
+local dogCard = Instance.new("TextButton")
+dogCard.Name = "ClassicDogCard"
+dogCard.Size = UDim2.new(1, 0, 0, 46)
+dogCard.Position = UDim2.new(0, 0, 0, 128)
+dogCard.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+dogCard.AutoButtonColor = false
+dogCard.Text = ""
+dogCard.Parent = contentArea
 
-        lI12 = Instance.new(O00O[13])
-        lI12.CornerRadius = UDim.new(1, 0)
-        lI12.Parent = Il12
-        _S = 0x950
-    elseif _S == 0x950 then
-        O0O3 = Instance.new(O00O[23])
-        O0O3.Name = O00O[28]
-        O0O3.Size = UDim2.new(1, 0, 0, 46)
-        O0O3.Position = UDim2.new(0, 0, 0, 76)
-        O0O3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        O0O3.AutoButtonColor = false
-        O0O3.Text = ""
-        O0O3.Parent = O0Ol
+local dogCorner = Instance.new("UICorner")
+dogCorner.CornerRadius = UDim.new(0, 8)
+dogCorner.Parent = dogCard
 
-        I1I2 = Instance.new(O00O[13])
-        I1I2.CornerRadius = UDim.new(0, 8)
-        I1I2.Parent = O0O3
+local dogStroke = Instance.new("UIStroke")
+dogStroke.Color = Color3.fromRGB(225, 230, 240)
+dogStroke.Thickness = 1
+dogStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+dogStroke.Parent = dogCard
 
-        l1l2 = Instance.new(O00O[14])
-        l1l2.Color = Color3.fromRGB(225, 230, 240)
-        l1l2.Thickness = 1
-        l1l2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-        l1l2.Parent = O0O3
+local dogIcon = Instance.new("ImageLabel")
+dogIcon.Size = UDim2.new(0, 22, 0, 22)
+dogIcon.Position = UDim2.new(0, 12, 0.5, -11)
+dogIcon.BackgroundTransparency = 1
+dogIcon.Image = "rbxassetid://7490013082"
+dogIcon.ImageColor3 = Color3.fromRGB(50, 150, 230)
+dogIcon.Parent = dogCard
 
-        O002 = Instance.new(O00O[25])
-        O002.Size = UDim2.new(0, 22, 0, 22)
-        O002.Position = UDim2.new(0, 12, 0.5, -11)
-        O002.BackgroundTransparency = 1
-        O002.Image = O00O[26]
-        O002.ImageColor3 = Color3.fromRGB(230, 120, 30)
-        O002.Parent = O0O3
+local dogTitle = Instance.new("TextLabel")
+dogTitle.Size = UDim2.new(1, -120, 1, 0)
+dogTitle.Position = UDim2.new(0, 44, 0, 0)
+dogTitle.BackgroundTransparency = 1
+dogTitle.Font = Enum.Font.GothamSemibold
+dogTitle.Text = "Classic Dog"
+dogTitle.TextColor3 = Color3.fromRGB(30, 32, 40)
+dogTitle.TextSize = 13
+dogTitle.TextXAlignment = Enum.TextXAlignment.Left
+dogTitle.Parent = dogCard
 
-        IlI2 = Instance.new(O00O[18])
-        IlI2.Size = UDim2.new(1, -120, 1, 0)
-        IlI2.Position = UDim2.new(0, 44, 0, 0)
-        IlI2.BackgroundTransparency = 1
-        IlI2.Font = Enum.Font.GothamSemibold
-        IlI2.Text = O00O[29]
-        IlI2.TextColor3 = Color3.fromRGB(30, 32, 40)
-        IlI2.TextSize = 13
-        IlI2.TextXAlignment = Enum.TextXAlignment.Left
-        IlI2.Parent = O0O3
+local dogTrack = Instance.new("Frame")
+dogTrack.Size = UDim2.new(0, 40, 0, 22)
+dogTrack.Position = UDim2.new(1, -54, 0.5, -11)
+dogTrack.BackgroundColor3 = Color3.fromRGB(215, 220, 230)
+dogTrack.BorderSizePixel = 0
+dogTrack.Parent = dogCard
 
-        lII2 = Instance.new(O00O[11])
-        lII2.Size = UDim2.new(0, 40, 0, 22)
-        lII2.Position = UDim2.new(1, -54, 0.5, -11)
-        lII2.BackgroundColor3 = Color3.fromRGB(215, 220, 230)
-        lII2.BorderSizePixel = 0
-        lII2.Parent = O0O3
+local dogTrackCorner = Instance.new("UICorner")
+dogTrackCorner.CornerRadius = UDim.new(1, 0)
+dogTrackCorner.Parent = dogTrack
 
-        O0O4 = Instance.new(O00O[13])
-        O0O4.CornerRadius = UDim.new(1, 0)
-        O0O4.Parent = lII2
+local dogTrackStroke = Instance.new("UIStroke")
+dogTrackStroke.Color = Color3.fromRGB(195, 205, 220)
+dogTrackStroke.Thickness = 1
+dogTrackStroke.Parent = dogTrack
 
-        I112 = Instance.new(O00O[14])
-        I112.Color = Color3.fromRGB(195, 205, 220)
-        I112.Thickness = 1
-        I112.Parent = lII2
+local dogKnob = Instance.new("Frame")
+dogKnob.Size = UDim2.new(0, 16, 0, 16)
+dogKnob.Position = UDim2.new(0, 3, 0.5, -8)
+dogKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+dogKnob.BorderSizePixel = 0
+dogKnob.Parent = dogTrack
 
-        l1I3 = Instance.new(O00O[11])
-        l1I3.Size = UDim2.new(0, 16, 0, 16)
-        l1I3.Position = UDim2.new(0, 3, 0.5, -8)
-        l1I3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        l1I3.BorderSizePixel = 0
-        l1I3.Parent = lII2
+local dogKnobCorner = Instance.new("UICorner")
+dogKnobCorner.CornerRadius = UDim.new(1, 0)
+dogKnobCorner.Parent = dogKnob
 
-        OO02 = Instance.new(O00O[13])
-        OO02.CornerRadius = UDim.new(1, 0)
-        OO02.Parent = l1I3
-        _S = 0xA60
-    elseif _S == 0xA60 then
-        Il13 = Instance.new(O00O[23])
-        Il13.Name = O00O[30]
-        Il13.Size = UDim2.new(1, 0, 0, 46)
-        Il13.Position = UDim2.new(0, 0, 0, 128)
-        Il13.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Il13.AutoButtonColor = false
-        Il13.Text = ""
-        Il13.Parent = O0Ol
+local iconButton = Instance.new("TextButton")
+iconButton.Name = "FloatingIcon"
+iconButton.Size = UDim2.new(0, 48, 0, 48)
+iconButton.Position = UDim2.new(0, 20, 0.5, -24)
+iconButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+iconButton.AutoButtonColor = false
+iconButton.Font = Enum.Font.GothamBold
+iconButton.Text = ""
+iconButton.Visible = isTouchDevice
+iconButton.Active = true
+iconButton.Parent = screenGui
 
-        lI13 = Instance.new(O00O[13])
-        lI13.CornerRadius = UDim.new(0, 8)
-        lI13.Parent = Il13
+local iconCorner = Instance.new("UICorner")
+iconCorner.CornerRadius = UDim.new(0, 12)
+iconCorner.Parent = iconButton
 
-        O0O5 = Instance.new(O00O[14])
-        O0O5.Color = Color3.fromRGB(225, 230, 240)
-        O0O5.Thickness = 1
-        O0O5.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-        O0O5.Parent = Il13
+local iconStroke = Instance.new("UIStroke")
+iconStroke.Color = Color3.fromRGB(220, 225, 235)
+iconStroke.Thickness = 1.4
+iconStroke.Parent = iconButton
 
-        I1I3 = Instance.new(O00O[25])
-        I1I3.Size = UDim2.new(0, 22, 0, 22)
-        I1I3.Position = UDim2.new(0, 12, 0.5, -11)
-        I1I3.BackgroundTransparency = 1
-        I1I3.Image = O00O[26]
-        I1I3.ImageColor3 = Color3.fromRGB(50, 150, 230)
-        I1I3.Parent = Il13
+local _, btnEyeLeft, btnEyeRight = createCyanEyes(iconButton, 13, -6)
 
-        l1l3 = Instance.new(O00O[18])
-        l1l3.Size = UDim2.new(1, -120, 1, 0)
-        l1l3.Position = UDim2.new(0, 44, 0, 0)
-        l1l3.BackgroundTransparency = 1
-        l1l3.Font = Enum.Font.GothamSemibold
-        l1l3.Text = O00O[31]
-        l1l3.TextColor3 = Color3.fromRGB(30, 32, 40)
-        l1l3.TextSize = 13
-        l1l3.TextXAlignment = Enum.TextXAlignment.Left
-        l1l3.Parent = Il13
+local isFoxActive = false
+foxCard.MouseButton1Click:Connect(function()
+    isFoxActive = not isFoxActive
+    local tweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
 
-        O003 = Instance.new(O00O[11])
-        O003.Size = UDim2.new(0, 40, 0, 22)
-        O003.Position = UDim2.new(1, -54, 0.5, -11)
-        O003.BackgroundColor3 = Color3.fromRGB(215, 220, 230)
-        O003.BorderSizePixel = 0
-        O003.Parent = Il13
-
-        IlI3 = Instance.new(O00O[13])
-        IlI3.CornerRadius = UDim.new(1, 0)
-        IlI3.Parent = O003
-
-        lII3 = Instance.new(O00O[14])
-        lII3.Color = Color3.fromRGB(195, 205, 220)
-        lII3.Thickness = 1
-        lII3.Parent = O003
-
-        O0O6 = Instance.new(O00O[11])
-        O0O6.Size = UDim2.new(0, 16, 0, 16)
-        O0O6.Position = UDim2.new(0, 3, 0.5, -8)
-        O0O6.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        O0O6.BorderSizePixel = 0
-        O0O6.Parent = O003
-
-        I113 = Instance.new(O00O[13])
-        I113.CornerRadius = UDim.new(1, 0)
-        I113.Parent = O0O6
-        _S = 0xB70
-    elseif _S == 0xB70 then
-        l1I4 = Instance.new(O00O[23])
-        l1I4.Name = O00O[32]
-        l1I4.Size = UDim2.new(0, 44, 0, 44)
-        l1I4.Position = O0O1.Position
-        l1I4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        l1I4.AutoButtonColor = false
-        l1I4.Font = Enum.Font.GothamBold
-        l1I4.Text = ""
-        l1I4.TextColor3 = Color3.fromRGB(99, 102, 241)
-        l1I4.TextSize = 14
-        l1I4.Visible = false
-        l1I4.Active = true
-        l1I4.Parent = lI1I
-
-        local _c1 = Instance.new(O00O[13])
-        _c1.CornerRadius = UDim.new(0, 10)
-        _c1.Parent = l1I4
-
-        OO03 = Instance.new(O00O[14])
-        OO03.Color = Color3.fromRGB(220, 225, 235)
-        OO03.Thickness = 1.2
-        OO03.Parent = l1I4
-
-        local _img1 = Instance.new(O00O[25])
-        _img1.Size = UDim2.new(0, 22, 0, 22)
-        _img1.Position = UDim2.new(0.5, -11, 0.5, -11)
-        _img1.BackgroundTransparency = 1
-        _img1.Image = O00O[26]
-        _img1.ImageColor3 = Color3.fromRGB(99, 102, 241)
-        _img1.Active = false
-        _img1.Parent = l1I4
-        _S = 0xC80
-    elseif _S == 0xC80 then
-        local function _tw(_o, _t, _p)
-            IlIl:Create(_o, TweenInfo.new(_t), _p):Play()
-        end
-
-        l1ll.MouseEnter:Connect(function()
-            _tw(l1ll, 0.18, {BackgroundColor3 = Color3.fromRGB(248, 250, 255)})
-            _tw(IlI1, 0.18, {Color = Color3.fromRGB(190, 200, 225)})
-            _tw(lII1, 0.18, {ImageColor3 = Color3.fromRGB(129, 132, 255)})
-        end)
-        l1ll.MouseLeave:Connect(function()
-            _tw(l1ll, 0.18, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)})
-            _tw(IlI1, 0.18, {Color = Color3.fromRGB(225, 230, 240)})
-            _tw(lII1, 0.18, {ImageColor3 = Color3.fromRGB(99, 102, 241)})
-        end)
-
-        O0O3.MouseEnter:Connect(function()
-            _tw(O0O3, 0.18, {BackgroundColor3 = Color3.fromRGB(248, 250, 255)})
-            _tw(l1l2, 0.18, {Color = Color3.fromRGB(190, 200, 225)})
-            _tw(O002, 0.18, {ImageColor3 = Color3.fromRGB(250, 140, 50)})
-        end)
-        O0O3.MouseLeave:Connect(function()
-            _tw(O0O3, 0.18, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)})
-            _tw(l1l2, 0.18, {Color = Color3.fromRGB(225, 230, 240)})
-            _tw(O002, 0.18, {ImageColor3 = Color3.fromRGB(230, 120, 30)})
-        end)
-
-        Il13.MouseEnter:Connect(function()
-            _tw(Il13, 0.18, {BackgroundColor3 = Color3.fromRGB(248, 250, 255)})
-            _tw(O0O5, 0.18, {Color = Color3.fromRGB(190, 200, 225)})
-            _tw(I1I3, 0.18, {ImageColor3 = Color3.fromRGB(70, 170, 250)})
-        end)
-        Il13.MouseLeave:Connect(function()
-            _tw(Il13, 0.18, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)})
-            _tw(O0O5, 0.18, {Color = Color3.fromRGB(225, 230, 240)})
-            _tw(I1I3, 0.18, {ImageColor3 = Color3.fromRGB(50, 150, 230)})
-        end)
-
-        l1I4.MouseEnter:Connect(function()
-            _tw(l1I4, 0.15, {BackgroundColor3 = Color3.fromRGB(248, 250, 255)})
-        end)
-        l1I4.MouseLeave:Connect(function()
-            _tw(l1I4, 0.15, {BackgroundColor3 = Color3.fromRGB(255, 255, 255)})
-        end)
-        _S = 0xD90
-    elseif _S == 0xD90 then
-        local _fA = false
-        l1ll.MouseButton1Click:Connect(function()
-            _fA = not _fA
-            local _ti = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            if _fA then
-                IlIl:Create(I111, _ti, {BackgroundColor3 = Color3.fromRGB(99, 102, 241)}):Play()
-                IlIl:Create(OO01, _ti, {Color = Color3.fromRGB(129, 132, 255)}):Play()
-                IlIl:Create(Il12, _ti, {Position = UDim2.new(1, -19, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            else
-                IlIl:Create(I111, _ti, {BackgroundColor3 = Color3.fromRGB(215, 220, 230)}):Play()
-                IlIl:Create(OO01, _ti, {Color = Color3.fromRGB(195, 205, 220)}):Play()
-                IlIl:Create(Il12, _ti, {Position = UDim2.new(0, 3, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            end
-            task.spawn(function()
-                if _fA then
-                    pcall(function()
-                        lIIl.Core.Remotes.System.GiveJewel:InvokeServer("Fox", "None", "None", "None", "None", O0OO.Character)
-                    end)
-                    task.wait(0.1)
-                    pcall(function()
-                        lIIl.Core.Remotes.Abilities.Transform:FireServer("Fox", "None", "Classic", "None")
-                    end)
-                else
-                    pcall(function()
-                        lIIl.Core.Remotes.Abilities.Transform:FireServer("Fox", "None", "Classic", "None")
-                    end)
-                end
-            end)
-        end)
-
-        local _sA = false
-        O0O3.MouseButton1Click:Connect(function()
-            _sA = not _sA
-            local _ti = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            if _sA then
-                IlIl:Create(lII2, _ti, {BackgroundColor3 = Color3.fromRGB(230, 120, 30)}):Play()
-                IlIl:Create(I112, _ti, {Color = Color3.fromRGB(250, 140, 50)}):Play()
-                IlIl:Create(l1I3, _ti, {Position = UDim2.new(1, -19, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            else
-                IlIl:Create(lII2, _ti, {BackgroundColor3 = Color3.fromRGB(215, 220, 230)}):Play()
-                IlIl:Create(I112, _ti, {Color = Color3.fromRGB(195, 205, 220)}):Play()
-                IlIl:Create(l1I3, _ti, {Position = UDim2.new(0, 3, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            end
-            task.spawn(function()
-                if _sA then
-                    pcall(function()
-                        lIIl.Core.Remotes.System.GiveJewel:InvokeServer("Ladybug", "None", "None", "None", "None", O0OO.Character)
-                    end)
-                    task.wait(0.1)
-                    pcall(function()
-                        lIIl.Core.Remotes.Abilities.Transform:FireServer("Ladybug", "None", "Scarabella", "None", true)
-                    end)
-                else
-                    pcall(function()
-                        lIIl.Core.Remotes.Abilities.Transform:FireServer("Ladybug", "None", "Scarabella", "None")
-                    end)
-                end
-            end)
-        end)
-
-        local _dA = false
-        Il13.MouseButton1Click:Connect(function()
-            _dA = not _dA
-            local _ti = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            if _dA then
-                IlIl:Create(O003, _ti, {BackgroundColor3 = Color3.fromRGB(50, 150, 230)}):Play()
-                IlIl:Create(lII3, _ti, {Color = Color3.fromRGB(70, 170, 250)}):Play()
-                IlIl:Create(O0O6, _ti, {Position = UDim2.new(1, -19, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            else
-                IlIl:Create(O003, _ti, {BackgroundColor3 = Color3.fromRGB(215, 220, 230)}):Play()
-                IlIl:Create(lII3, _ti, {Color = Color3.fromRGB(195, 205, 220)}):Play()
-                IlIl:Create(O0O6, _ti, {Position = UDim2.new(0, 3, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-            end
-            task.spawn(function()
-                if _dA then
-                    pcall(function()
-                        lIIl.Core.Remotes.System.GiveJewel:InvokeServer("Dog", "None", "Reimagined", "None", "None", O0OO.Character)
-                    end)
-                    task.wait(0.1)
-                    pcall(function()
-                        lIIl.Core.Remotes.Abilities.Transform:FireServer("Dog", "None", "Classic", "None")
-                    end)
-                else
-                    pcall(function()
-                        lIIl.Core.Remotes.Abilities.Transform:FireServer("Dog", "None", "Classic", "None")
-                    end)
-                end
-            end)
-        end)
-        _S = 0xEA0
-    elseif _S == 0xEA0 then
-        local function _dG(_h, _t)
-            local _d = false
-            local _o = Vector2.zero
-            l1IlI(Il1I, _h.InputBegan:Connect(function(_i)
-                if _i.UserInputType == Enum.UserInputType.MouseButton1 or _i.UserInputType == Enum.UserInputType.Touch then
-                    _d = true
-                    local _m = O000:GetMouseLocation()
-                    _o = Vector2.new(_m.X - _t.AbsolutePosition.X, _m.Y - _t.AbsolutePosition.Y)
-                end
-            end))
-            l1IlI(Il1I, O000.InputEnded:Connect(function(_i)
-                if _i.UserInputType == Enum.UserInputType.MouseButton1 or _i.UserInputType == Enum.UserInputType.Touch then
-                    _d = false
-                end
-            end))
-            l1IlI(Il1I, O000.InputChanged:Connect(function(_i)
-                if _d and (_i.UserInputType == Enum.UserInputType.MouseMovement or _i.UserInputType == Enum.UserInputType.Touch) then
-                    local _m = O000:GetMouseLocation()
-                    _t.Position = UDim2.fromOffset(_m.X - _o.X, _m.Y - _o.Y)
-                end
-            end))
-        end
-
-        _dG(IlII, O0O1)
-        _dG(l1I4, l1I4)
-
-        local _v = true
-        local _tw = false
-
-        local function _tG()
-            if _tw or not lI1I.Parent then return end
-            _tw = true
-            _v = not _v
-            local _ti = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-            if not _v then
-                l1I4.Position = O0O1.Position
-                l1I4.Visible = true
-                l1I4.Size = UDim2.new(0, 0, 0, 0)
-                l1I4.BackgroundTransparency = 1
-                OO03.Transparency = 1
-
-                IlIl:Create(O0O1, _ti, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}):Play()
-                IlIl:Create(l1lI, _ti, {Transparency = 1}):Play()
-                local _3 = IlIl:Create(l1I4, _ti, {Size = UDim2.new(0, 44, 0, 44), BackgroundTransparency = 0})
-                IlIl:Create(OO03, _ti, {Transparency = 0}):Play()
-
-                _3:Play()
-                _3.Completed:Wait()
-                O0O1.Visible = false
-            else
-                O0O1.Position = l1I4.Position
-                O0O1.Visible = true
-                O0O1.Size = UDim2.new(0, 0, 0, 0)
-
-                IlIl:Create(l1I4, _ti, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}):Play()
-                IlIl:Create(OO03, _ti, {Transparency = 1}):Play()
-                local _3 = IlIl:Create(O0O1, _ti, {Size = UDim2.new(0, 340, 0, 300), BackgroundTransparency = 0})
-                IlIl:Create(l1lI, _ti, {Transparency = 0}):Play()
-
-                _3:Play()
-                _3.Completed:Wait()
-                l1I4.Visible = false
-            end
-            _tw = false
-        end
-
-        l1IlI(Il1I, l1I4.MouseButton1Click:Connect(_tG))
-
-        local _uL = false
-        local function _uF()
-            if _uL then return end
-            _uL = true
-            for _, _c in ipairs(Il1I) do
-                if _c.Connected then _c:Disconnect() end
-            end
-            O0000(Il1I)
-            if lI1I then lI1I:Destroy() end
-        end
-
-        l1IlI(Il1I, O000.InputBegan:Connect(function(_i, _g)
-            if _g then return end
-            if _i.KeyCode == l1I1 then
-                task.spawn(_tG)
-            elseif _i.KeyCode == OO00 then
-                _uF()
-            end
-        end))
-        _S = 0x0
+    if isFoxActive then
+        TweenService:Create(switchTrack, tweenInfo, {BackgroundColor3 = Color3.fromRGB(0, 210, 235)}):Play()
+        TweenService:Create(trackStroke, tweenInfo, {Color = Color3.fromRGB(80, 235, 255)}):Play()
+        TweenService:Create(switchKnob, tweenInfo, {
+            Position = UDim2.new(1, -19, 0.5, -8),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    else
+        TweenService:Create(switchTrack, tweenInfo, {BackgroundColor3 = Color3.fromRGB(215, 220, 230)}):Play()
+        TweenService:Create(trackStroke, tweenInfo, {Color = Color3.fromRGB(195, 205, 220)}):Play()
+        TweenService:Create(switchKnob, tweenInfo, {
+            Position = UDim2.new(0, 3, 0.5, -8),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
     end
+
+    task.spawn(function()
+        if isFoxActive then
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.System.GiveJewel:InvokeServer("Fox", "None", "None", "None", "None", player.Character)
+            end)
+            task.wait(0.1)
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.Abilities.Transform:FireServer("Fox", "None", "Classic", "None")
+            end)
+        else
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.Abilities.Transform:FireServer("Fox", "None", "Classic", "None")
+            end)
+        end
+    end)
+end)
+
+local isScarabActive = false
+scarabCard.MouseButton1Click:Connect(function()
+    isScarabActive = not isScarabActive
+    local tweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+
+    if isScarabActive then
+        TweenService:Create(scarabTrack, tweenInfo, {BackgroundColor3 = Color3.fromRGB(230, 120, 30)}):Play()
+        TweenService:Create(scarabTrackStroke, tweenInfo, {Color = Color3.fromRGB(250, 140, 50)}):Play()
+        TweenService:Create(scarabKnob, tweenInfo, {
+            Position = UDim2.new(1, -19, 0.5, -8),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    else
+        TweenService:Create(scarabTrack, tweenInfo, {BackgroundColor3 = Color3.fromRGB(215, 220, 230)}):Play()
+        TweenService:Create(scarabTrackStroke, tweenInfo, {Color = Color3.fromRGB(195, 205, 220)}):Play()
+        TweenService:Create(scarabKnob, tweenInfo, {
+            Position = UDim2.new(0, 3, 0.5, -8),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    end
+
+    task.spawn(function()
+        if isScarabActive then
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.System.GiveJewel:InvokeServer("Ladybug", "None", "None", "None", "None", player.Character)
+            end)
+            task.wait(0.1)
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.Abilities.Transform:FireServer("Ladybug", "None", "Scarabella", "None", true)
+            end)
+        else
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.Abilities.Transform:FireServer("Ladybug", "None", "Scarabella", "None")
+            end)
+        end
+    end)
+end)
+
+local isDogActive = false
+dogCard.MouseButton1Click:Connect(function()
+    isDogActive = not isDogActive
+    local tweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+
+    if isDogActive then
+        TweenService:Create(dogTrack, tweenInfo, {BackgroundColor3 = Color3.fromRGB(50, 150, 230)}):Play()
+        TweenService:Create(dogTrackStroke, tweenInfo, {Color = Color3.fromRGB(70, 170, 250)}):Play()
+        TweenService:Create(dogKnob, tweenInfo, {
+            Position = UDim2.new(1, -19, 0.5, -8),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    else
+        TweenService:Create(dogTrack, tweenInfo, {BackgroundColor3 = Color3.fromRGB(215, 220, 230)}):Play()
+        TweenService:Create(dogTrackStroke, tweenInfo, {Color = Color3.fromRGB(195, 205, 220)}):Play()
+        TweenService:Create(dogKnob, tweenInfo, {
+            Position = UDim2.new(0, 3, 0.5, -8),
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        }):Play()
+    end
+
+    task.spawn(function()
+        if isDogActive then
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.System.GiveJewel:InvokeServer("Dog", "None", "Reimagined", "None", "None", player.Character)
+            end)
+            task.wait(0.1)
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.Abilities.Transform:FireServer("Dog", "None", "Classic", "None")
+            end)
+        else
+            pcall(function()
+                ReplicatedStorage.Core.Remotes.Abilities.Transform:FireServer("Dog", "None", "Classic", "None")
+            end)
+        end
+    end)
+end)
+
+local function enableTouchDrag(targetObj: GuiObject)
+    local isDragging = false
+    local dragStart = Vector2.zero
+    local startPos = UDim2.new()
+    local dragInput
+
+    table.insert(connections, targetObj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isDragging = true
+            dragStart = input.Position
+            startPos = targetObj.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    isDragging = false
+                end
+            end)
+        end
+    end))
+
+    table.insert(connections, targetObj.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end))
+
+    table.insert(connections, UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and isDragging then
+            local delta = input.Position - dragStart
+            targetObj.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end))
 end
+
+enableTouchDrag(mainFrame)
+enableTouchDrag(iconButton)
+
+local isVisible = true
+local isTweening = false
+
+local function toggleGui()
+    if isTweening or not screenGui.Parent then return end
+    isTweening = true
+
+    isVisible = not isVisible
+    local tweenInfo = TweenInfo.new(0.22, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+
+    if not isVisible then
+        mainFrame.Visible = false
+        iconButton.Visible = true
+    else
+        mainFrame.Visible = true
+        if not isTouchDevice then
+            iconButton.Visible = false
+        end
+    end
+
+    isTweening = false
+end
+
+table.insert(connections, iconButton.MouseButton1Click:Connect(toggleGui))
+table.insert(connections, minimizeBtn.MouseButton1Click:Connect(toggleGui))
+
+local isUnloaded = false
+local function unloadGui()
+    if isUnloaded then return end
+    isUnloaded = true
+
+    for _, conn in ipairs(connections) do
+        if conn.Connected then conn:Disconnect() end
+    end
+    table.clear(connections)
+
+    if screenGui then screenGui:Destroy() end
+end
+
+table.insert(connections, UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    if input.KeyCode == TOGGLE_KEY then
+        task.spawn(toggleGui)
+    elseif input.KeyCode == UNLOAD_KEY then
+        unloadGui()
+    end
+end))
